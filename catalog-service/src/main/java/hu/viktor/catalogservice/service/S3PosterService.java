@@ -21,7 +21,6 @@ public class S3PosterService {
     public String uploadPoster(MultipartFile file) throws IOException {
         String filename = UUID.randomUUID() + "-" + file.getOriginalFilename();
 
-        //Fájl feltöltése LocalStack S3-ba
         s3Template.upload(bucketName, filename, file.getInputStream());
 
         return "http://localhost:4566/" + bucketName + "/" + filename;

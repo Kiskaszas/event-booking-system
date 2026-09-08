@@ -11,8 +11,6 @@ import java.util.LinkedList;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-// A @DynamoDbBean és a @DynamoDbPartitionKey kötelező a Spring Cloud AWS
-// DynamoDbTemplate (Enhanced Client) számára, enélkül a save() 500-as hibát dob.
 @DynamoDbBean
 @Getter
 @Setter
@@ -23,10 +21,6 @@ public class Event {
     private LocalDateTime date;
     private int availableSeats;
 
-    // Lombok-nak nem adunk annotációt közvetlenül a mezőn, ezért itt manuálisan
-    // felülírjuk a getId()-t, hogy rá tudjuk tenni a DynamoDB annotációkat.
-    // A tábla partition key-je "eventId" néven jött létre a setup-aws.sh-ban,
-    // ezért kell a @DynamoDbAttribute("eventId") is.
     @DynamoDbPartitionKey
     @DynamoDbAttribute("eventId")
     public UUID getId() {

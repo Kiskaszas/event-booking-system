@@ -25,13 +25,12 @@ import java.util.UUID;
 public class EventController {
 
     private final EventService eventService;
-    private final EventRepository eventRepository; // Ezt később érdemes bemozgatni az EventService-be a Get/Upload hívásokhoz
+    private final EventRepository eventRepository;
     private final S3PosterService s3PosterService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public EventResponse createEvent(@Valid @RequestBody CreateEventRequest request) {
-        // A Controller nem gyárt Entitást, hanem delegálja az üzleti logikának (EventService)
         Event savedEvent = eventService.createEvent(request);
         return mapToResponse(savedEvent);
     }
@@ -55,17 +54,14 @@ public class EventController {
         }
 
         Event event = eventOpt.get();
-        // A poszter URL frissítését jövőben érdemes áthelyezni az EventService-be
         String posterUrl = s3PosterService.uploadPoster(file);
 
-        // Jelenleg a modell nem tartalmazza a posterUrl mezőt, ha kiegészíted, itt hívhatod meg a setterét.
         Event updatedEvent = eventRepository.save(event);
 
         return ResponseEntity.ok(mapToResponse(updatedEvent));
     }
 
     private EventResponse mapToResponse(Event event) {
-        // A SimpleDateFormat lecserélése Java 8+ DateTimeFormatter-re
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         return new EventResponse(
                 event.getId().toString(),
