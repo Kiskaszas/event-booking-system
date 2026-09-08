@@ -1,0 +1,20 @@
+server:
+  port: 8000
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        # Minden, ami /api/events/ kezdetű, a Catalog Service-hez megy
+        - id: catalog-service-route
+          uri: http://localhost:8080
+          predicates:
+            - Path=/api/events/**
+
+        # Minden, ami /api/orders/ kezdetű, az Order Service-hez megy
+        - id: order-service-route
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/orders/**

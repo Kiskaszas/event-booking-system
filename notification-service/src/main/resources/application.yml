@@ -1,0 +1,15 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: notification-service
+  cloud:
+    aws:
+      region:
+        static: us-east-1
+      credentials:
+        access-key: localstack
+        secret-key: localstack
+      sqs:
+        endpoint: http://127.0.0.1:4566

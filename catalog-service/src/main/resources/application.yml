@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: catalog-service
+  cloud:
+    aws:
+      region:
+        static: us-east-1
+      credentials:
+        access-key: localstack
+        secret-key: localstack
+      endpoint: http://127.0.0.1:4566
+      dynamodb:
+        endpoint: http://127.0.0.1:4566
+      s3:
+        endpoint: http://127.0.0.1:4566
+        path-style-access-enabled: true
+
+catalog:
+  s3:
+    bucket-name: event-posters

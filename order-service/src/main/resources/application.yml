@@ -1,0 +1,28 @@
+
+spring:
+  application:
+    name: order-service
+  datasource:
+    url: jdbc:postgresql://localhost:5433/orderdb
+    username: orderuser
+    password: orderpass
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  cloud:
+    aws:
+      region:
+        static: us-east-1
+      credentials:
+        access-key: localstack
+        secret-key: localstack
+      endpoint: http://127.0.0.1:4566
+      sns:
+        endpoint: http://127.0.0.1:4566
+
+order:
+  sns:
+    topic-arn: arn:aws:sns:us-east-1:000000000000:order-events-topic
+server:
+  port: 8082

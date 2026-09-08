@@ -1,0 +1,33 @@
+services:
+  localstack:
+    image: localstack/localstack:latest
+    container_name: event-localstack
+    ports:
+      - "127.0.0.1:4566:4566"
+      - "127.0.0.1:4510-4559:4510-4559"
+    environment:
+      - DEBUG=1
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - LOCALSTACK_AUTH_TOKEN=ls-kIHAzixA-0894-3523-gEYi-KakaVUhue3fc
+    volumes:
+      - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./localstack-init:/etc/localstack/init/ready.d"
+    networks:
+      - event-network
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: event-postgres
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_USER=orderuser
+      - POSTGRES_PASSWORD=orderpass
+      - POSTGRES_DB=orderdb
+    networks:
+      - event-network
+
+networks:
+  event-network:
+    driver: bridge
