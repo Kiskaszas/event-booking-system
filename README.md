@@ -1,38 +1,40 @@
-# Event Booking System
+# Cloud-Native Event Booking System (Microservices Demo)
 
-Felhőnatív, eseményvezérelt mikroszolgáltatás-architektúra (microservices), amely Hexagonális (Ports and Adapters) tervezési mintára épül. A rendszer célja események (koncertek, előadások) böngészése, jegyek foglalása és aszinkron értesítések küldése.
+Ez egy eseményvezérelt mikroszerviz architektúrát bemutató demó alkalmazás, amely a Spring Boot 3 és a LocalStack segítségével szimulál egy AWS felhőkörnyezetet (S3, DynamoDB, SNS, SQS) lokálisan. A rendszer szigorúan követi a **SOLID**, a **Clean Code**, valamint a **Hexagonális Architektúra (Ports and Adapters)** elveit.
 
-## Architektúra és Szolgáltatások
+## 🏛️ Architektúra
 
-A projekt egy monorepó, amely az alábbi független szolgáltatásokból áll:
+A rendszer egy monorepóban kapott helyet, és három fő mikroszervizből áll:
 
-*   **`api-gateway`**: Egységes belépési pont (Spring Cloud Gateway) a kliensek számára, amely a megfelelő szolgáltatásokhoz irányítja a REST kéréseket.
-*   **`catalog-service`**: Felelős az események (Event) nyilvántartásáért, a szabad helyek kezeléséért, valamint a rendezvényekhez tartozó poszterképek S3-ban történő tárolásáért. (Adatbázis: Amazon DynamoDB).
-*   **`order-service`**: Kezeli a jegyfoglalási folyamatokat, a tranzakciókat és a versenyhelyzeteket (race conditions). (Adatbázis: PostgreSQL).
-*   **`notification-service`**: Eseményvezérelt szolgáltatás, amely az SQS/SNS üzenetsorokon keresztül beérkező sikeres foglalási eseményekre reagálva aszinkron értesítéseket küld a felhasználóknak.
+1. **Catalog Service (Port 8080):**
+   - Kezeli az eseményeket és a posztereket.
+   - Belső felépítése izolálja a domain logikát az infrastruktúrától.
+   - **AWS S3:** Képfeltöltés és tárolás.
+   - **AWS DynamoDB:** Esemény entitások gyors NoSQL tárolása.
+2. **Order Service (Port 8082):**
+   - Fogadja a jegyvásárlási tranzakciókat.
+   - **PostgreSQL:** Tranzakcionális adatbázis a rendelésekhez. Beépített **Transactional Outbox** mintát használ a Dual-Write probléma elkerülésére.
+   - **AWS SNS:** Sikeres rendelés esetén pub/sub üzenetet küld az eseménybuszra egy háttérben futó poller segítségével.
+3. **Notification Service (Port 8083):**
+   - Háttérfolyamat (worker), amely a kiküldött értesítésekért felel.
+   - **AWS SQS:** Feliratkozik az SNS topikra és aszinkron módon feldolgozza a bejövő üzeneteket. Robusztus (fail-fast) hibakezelést használ az SQS újrapróbálási és DLQ mechanizmusainak kihasználásához.
 
-## Technológiai Stack
+## 🚀 Technológiai Stack
+- **Java 17**
+- **Spring Boot 3.2.x** (Spring Web, Spring Data JPA, Validation)
+- **Spring Cloud AWS 3.1.x**
+- **Docker & Docker Compose**
+- **LocalStack** (AWS felhő szimuláció)
+- **PostgreSQL**
 
-*   **Nyelv & Keretrendszer**: Java 21, Spring Boot 3.2.5
-*   **Architektúra minta**: Hexagonal Architecture (Ports and Adapters)
-*   **Adatbázisok**: PostgreSQL, Amazon DynamoDB
-*   **Cloud & Üzenetküldés**: Amazon S3, SQS, SNS (AWS LocalStack konténerrel emulálva)
-*   **Tesztelés**: BDD (Cucumber), JUnit 5, Testcontainers, Awaitility
-*   **Build eszköz & Egyéb**: Maven, Lombok, Docker Compose
+## 🛠️ Futtatás Helyben (Local Environment)
 
-## Lokális Fejlesztői Környezet Beállítása
-
-### Előfeltételek
-*   Java 21 JDK
-*   Apache Maven
-*   Docker és Docker Compose (a LocalStack és az adatbázisok futtatásához)
-
-### Infrastruktúra indítása
-A mikroszolgáltatások elindítása vagy a tesztek futtatása előtt fel kell húzni a háttérszolgáltatásokat (PostgreSQL, LocalStack) tartalmazó konténereket a projekt gyökérmappájából:
+### 1. Infrastruktúra indítása
+A projekt gyökerében futtasd a Docker Compose-t, amely elindítja a LocalStack-et (és automatikusan létrehozza a felhős erőforrásokat a `setup-aws.sh` szkripttel), valamint a PostgreSQL adatbázist.
 
 ```bash
-docker-compose up -d
-```
+docker compose up -d
+````
 
 ### Futó konténerek leállítása
 ```bash
