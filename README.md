@@ -1,47 +1,47 @@
 # Cloud-Native Event Booking System (Microservices Demo)
 
-Ez egy eseményvezérelt mikroszerviz architektúrát bemutató demó alkalmazás, amely a Spring Boot 3 és a LocalStack segítségével szimulál egy AWS felhőkörnyezetet (S3, DynamoDB, SNS, SQS) lokálisan. A rendszer szigorúan követi a **SOLID**, a **Clean Code**, valamint a **Hexagonális Architektúra (Ports and Adapters)** elveit.
+This is a demo application showcasing an event-driven microservice architecture, using Spring Boot 3 and LocalStack to simulate an AWS cloud environment (S3, DynamoDB, SNS, SQS) locally. The system strictly follows the principles of **SOLID**, **Clean Code**, and **Hexagonal Architecture (Ports and Adapters)**.
 
-## 🏛️ Architektúra
+## 🏛️ Architecture
 
-A rendszer egy monorepóban kapott helyet, és három fő mikroszervizből áll:
+The system lives in a single monorepo and consists of three main microservices:
 
 1. **Catalog Service (Port 8080):**
-   - Kezeli az eseményeket és a posztereket.
-   - Belső felépítése izolálja a domain logikát az infrastruktúrától.
-   - **AWS S3:** Képfeltöltés és tárolás.
-   - **AWS DynamoDB:** Esemény entitások gyors NoSQL tárolása.
+   - Manages events and posters.
+   - Its internal structure isolates domain logic from infrastructure.
+   - **AWS S3:** Image upload and storage.
+   - **AWS DynamoDB:** Fast NoSQL storage for event entities.
 2. **Order Service (Port 8082):**
-   - Fogadja a jegyvásárlási tranzakciókat.
-   - **PostgreSQL:** Tranzakcionális adatbázis a rendelésekhez. Beépített **Transactional Outbox** mintát használ a Dual-Write probléma elkerülésére.
-   - **AWS SNS:** Sikeres rendelés esetén pub/sub üzenetet küld az eseménybuszra egy háttérben futó poller segítségével.
+   - Handles ticket purchase transactions.
+   - **PostgreSQL:** Transactional database for orders. Uses a built-in **Transactional Outbox** pattern to avoid the Dual-Write problem.
+   - **AWS SNS:** On a successful order, publishes a pub/sub message to the event bus via a background poller.
 3. **Notification Service (Port 8083):**
-   - Háttérfolyamat (worker), amely a kiküldött értesítésekért felel.
-   - **AWS SQS:** Feliratkozik az SNS topikra és aszinkron módon feldolgozza a bejövő üzeneteket. Robusztus (fail-fast) hibakezelést használ az SQS újrapróbálási és DLQ mechanizmusainak kihasználásához.
+   - A background worker responsible for dispatched notifications.
+   - **AWS SQS:** Subscribes to the SNS topic and processes incoming messages asynchronously. Uses robust (fail-fast) error handling to take advantage of SQS's retry and DLQ mechanisms.
 
-## 🚀 Technológiai Stack
+## 🚀 Technology Stack
 - **Java 17**
 - **Spring Boot 3.2.x** (Spring Web, Spring Data JPA, Validation)
 - **Spring Cloud AWS 3.1.x**
 - **Docker & Docker Compose**
-- **LocalStack** (AWS felhő szimuláció)
+- **LocalStack** (AWS cloud simulation)
 - **PostgreSQL**
 
-## 🛠️ Futtatás Helyben (Local Environment)
+## 🛠️ Running Locally (Local Environment)
 
-### 1. Infrastruktúra indítása
-A projekt gyökerében futtasd a Docker Compose-t, amely elindítja a LocalStack-et (és automatikusan létrehozza a felhős erőforrásokat a `setup-aws.sh` szkripttel), valamint a PostgreSQL adatbázist.
+### 1. Starting the infrastructure
+Run Docker Compose from the project root, which starts LocalStack (and automatically provisions the cloud resources via the `setup-aws.sh` script), as well as the PostgreSQL database.
 
 ```bash
 docker compose up -d
-````
+```
 
-### Futó konténerek leállítása
+### Stopping the running containers
 ```bash
 docker-compose down
 ```
 
-### Konténerek logjainak folyamatos követése (pl. LocalStack hibakereséshez)
+### Continuously following the container logs (e.g. for LocalStack debugging)
 ```bash
 docker-compose logs -f
 ```
